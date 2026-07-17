@@ -1,0 +1,6 @@
+# Deploy secrets + lock (deploy.sh reads .env; .env.example is the committed template)
+.env
+.deploy.lock
+
+# Daniel's real Days Counter backup — personal event data, never commit
+_temp/backup*
