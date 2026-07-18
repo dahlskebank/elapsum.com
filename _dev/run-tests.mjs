@@ -190,5 +190,25 @@ process.on('exit', () => {
 		eq(out.version, 4);
 		eq(out.exported, '2026-07-17T00:00:00.000Z');
 		eq(out.events, [{ id: 1 }]);
+		eq(out.order, [1]);
+		eq(out.settings, { theme: 'dark' });
+	});
+	/* The next two tests exercise failure paths on purpose — the
+	   "save failed" / "load failed" console.error lines they print
+	   are EXPECTED output, not real failures. */
+	test('save: returns true on success, false (no throw) when storage throws', () => {
+		eq(call('save(load())'), true);
+		eq(call(`(function(){
+			const orig = localStorage.setItem;
+			localStorage.setItem = function(){ throw new Error('quota'); };
+			const r = save(load());
+			localStorage.setItem = orig;
+			return r;
+		})()`), false);
+	});
+	test('load: corrupt JSON falls back to default state, no throw', () => {
+		call(`localStorage.setItem('days.slate.v1', 'not json')`);
+		eq(call('load()'),
+			{ events: [], sort: 'added_desc', order: [], settings: { theme: 'dark', brutal: false, gradient: true, dateFmt: 'd.m.Y', dateFmtCustom: '' } });
 	});
 }
