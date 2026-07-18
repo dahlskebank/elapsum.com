@@ -168,3 +168,27 @@ process.on('exit', () => {
 		eq([dd1.start.id, dd1.end.id], [1, 2]);
 	});
 }
+
+/* ==== Task 6: storage ==== */
+{
+	const { call } = freshContext();
+	test('load: empty storage → default state', () => {
+		eq(call('load()'),
+			{ events: [], sort: 'added_desc', order: [], settings: { theme: 'dark', brutal: false, gradient: true, dateFmt: 'd.m.Y', dateFmtCustom: '' } });
+	});
+	test('migrate: isRange → kind, defaults pinned/units', () => {
+		eq(call(`migrate({ id: 1, title: 'x', date: '2025-01-01', isRange: true })`),
+			{ id: 1, title: 'x', date: '2025-01-01', kind: 'range', pinned: false, units: null });
+	});
+	test('save/load round-trip through localStorage', () => {
+		call(`(function(){ const s = load(); s.events.push({ id: 1, title: 'a', desc: '', date: '2025-01-01', end: null, kind: 'single', units: null, pinned: false, color: COLORS[0], added: 1 }); save(s); })()`);
+		eq(call('load().events.length'), 1);
+	});
+	test('buildExport: elapsum envelope with events/order/settings', () => {
+		const out = call(`buildExport({ events: [{ id: 1 }], order: [1], settings: { theme: 'dark' } }, '2026-07-17T00:00:00.000Z')`);
+		eq(out.app, 'elapsum');
+		eq(out.version, 4);
+		eq(out.exported, '2026-07-17T00:00:00.000Z');
+		eq(out.events, [{ id: 1 }]);
+	});
+}
