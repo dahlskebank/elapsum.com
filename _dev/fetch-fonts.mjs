@@ -14,8 +14,17 @@ import { writeFileSync, mkdirSync } from 'node:fs';
 /* A modern-Chrome UA makes the API serve woff2 (default UA gets ttf). */
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36';
 /* [request URL, family name to declare locally, extra @font-face line, slug base] */
+/* One request PER weight on purpose: batching wght@400;500;600;800 makes
+   Google serve the same variable-font file four times over; individual
+   requests return small distinct static instances. */
 const JOBS = [
-	['https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&display=swap',
+	['https://fonts.googleapis.com/css2?family=Archivo:wght@400&display=swap',
+		'Archivo', '', 'archivo'],
+	['https://fonts.googleapis.com/css2?family=Archivo:wght@500&display=swap',
+		'Archivo', '', 'archivo'],
+	['https://fonts.googleapis.com/css2?family=Archivo:wght@600&display=swap',
+		'Archivo', '', 'archivo'],
+	['https://fonts.googleapis.com/css2?family=Archivo:wght@800&display=swap',
 		'Archivo', '', 'archivo'],
 	['https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,600&display=swap',
 		'Archivo Expanded', '\tfont-stretch:125%;\n', 'archivo-expanded'],
