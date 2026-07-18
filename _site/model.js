@@ -38,8 +38,9 @@ const DDDD = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Satur
 /* WordPress-style token formatter: d j m n y Y M F D l.
    A backslash escapes the next character ("\Y Y" → "Y 2026"): the
    regex consumes backslash+char in a single match, so escaped letters
-   never reach the token map. A trailing lone backslash matches
-   nothing and is left as-is. */
+   never reach the token map. Doubling it ("\\Y" → "\2026") yields one
+   literal backslash. A trailing lone backslash matches nothing and is
+   left as-is. */
 function fmtTokens(s, pattern) {
 	const [y, m, d] = s.split('-').map(Number);
 	const dow = new Date(toUTCnoon(s)).getUTCDay();

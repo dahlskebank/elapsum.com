@@ -115,4 +115,7 @@ process.on('exit', () => {
 	test('fmtTokens: trailing lone backslash survives as-is', () => {
 		eq(call(String.raw`fmtTokens('2026-01-31','j\\')`), '31\\');
 	});
+	test('fmtTokens: double backslash yields one literal backslash', () => {
+		eq(call(String.raw`fmtTokens('2026-01-31','\\\\Y')`), '\\2026');
+	});
 }
