@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+	<title>Elapsum — days since, days until</title>
+	<meta name="description" content="A self-hosted days counter. Days since, days until, periods with both ends counted, and yearly events — installable, offline, all data on your device.">
+	<meta name="author" content="Daniel Dahl">
+	<meta name="robots" content="index, follow">
+	<link rel="canonical" href="https://elapsum.com/">
+
+	<!-- Open Graph -->
+	<meta property="og:type" content="website">
+	<meta property="og:site_name" content="Elapsum">
+	<meta property="og:locale" content="en_US">
+	<meta property="og:url" content="https://elapsum.com/">
+	<meta property="og:title" content="Elapsum">
+	<meta property="og:description" content="Days since, days until. A self-hosted days counter that can't be taken away.">
+	<meta property="og:image" content="https://elapsum.com/assets/img/og-image.jpg">
+	<meta property="og:image:type" content="image/jpeg">
+	<meta property="og:image:width" content="1200">
+	<meta property="og:image:height" content="630">
+	<meta property="og:image:alt" content="Elapsum — a self-hosted days counter">
+
+	<!-- Twitter / X card -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:title" content="Elapsum">
+	<meta name="twitter:description" content="Days since, days until. A self-hosted days counter that can't be taken away.">
+	<meta name="twitter:image" content="https://elapsum.com/assets/img/og-image.jpg">
+
+	<!-- PWA + icons -->
+	<meta name="theme-color" content="#101014">
+	<link rel="manifest" href="/manifest.webmanifest">
+	<link rel="icon" href="/favicon.ico" sizes="48x48">
+	<link rel="icon" href="/assets/icons/icon.svg" type="image/svg+xml">
+	<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+	<link rel="sitemap" type="application/xml" href="/sitemap.xml">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="apple-mobile-web-app-title" content="Elapsum">
+
+	<!-- Self-hosted fonts: preload the two that paint first (brand + body) -->
+	<link rel="preload" href="/assets/fonts/archivo-expanded-600-latin.woff2" as="font" type="font/woff2" crossorigin>
+	<link rel="preload" href="/assets/fonts/archivo-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+	<link rel="stylesheet" href="/style.css">
+
+	<!-- Google Analytics 4 — paste the elapsum.com measurement id
+	     ("G-XXXXXXXXXX") below to enable. Empty string = fully disabled.
+	     Offline/PWA safe: without network the gtag request fails silently. -->
+	<script>
+		window.GA_ID = "";
+		if (window.GA_ID) {
+			window.dataLayer = window.dataLayer || [];
+			window.gtag = function () { dataLayer.push(arguments); };
+			gtag("js", new Date());
+			gtag("config", window.GA_ID);
+			var gaScript = document.createElement("script");
+			gaScript.async = true;
+			gaScript.src = "https://www.googletagmanager.com/gtag/js?id=" + window.GA_ID;
+			document.head.appendChild(gaScript);
+		}
+	</script>
+
+	<!-- JSON-LD structured data -->
+	<script type="application/ld+json">
+	{
+		"@context": "https://schema.org",
+		"@type": "WebApplication",
+		"name": "Elapsum",
+		"url": "https://elapsum.com/",
+		"description": "A self-hosted days counter: days since, days until, periods, yearly events. Installable PWA, fully offline.",
+		"applicationCategory": "UtilitiesApplication",
+		"operatingSystem": "Any"
+	}
+	</script>
+</head>
+<body>
+
+<!-- LEFT panel: sort -->
+<div class="panel left" id="panelLeft">
+  <h2>Sort</h2>
+  <button class="menu-item" data-sort="custom">Custom order<small>Long-press a card, then drag to reorder</small></button>
+  <button class="menu-item" data-sort="title_asc">By title (A–Z)</button>
+  <button class="menu-item" data-sort="title_desc">By title (Z–A)</button>
+  <button class="menu-item" data-sort="date_asc">Ascending date</button>
+  <button class="menu-item" data-sort="date_desc">Descending date</button>
+  <button class="menu-item" data-sort="dur_desc">Longest duration first</button>
+  <button class="menu-item" data-sort="dur_asc">Shortest duration first</button>
+  <button class="menu-item" data-sort="added_asc">Ascending date added</button>
+  <button class="menu-item" data-sort="added_desc">Descending date added</button>
+  <div class="panel-hint">Pinned cards always stay on top.<br>The Yearly tab sorts itself by next occurrence.</div>
+</div>
+
+<!-- RIGHT panel: settings -->
+<div class="panel right" id="panelRight">
+  <h2>Settings</h2>
+  <div class="menu-head">Appearance</div>
+  <div class="setting-row"><div>Light theme</div><div class="tgl" id="tglTheme" role="switch" tabindex="0"></div></div>
+  <div class="setting-row"><div>Brutalist mode<small>Flat, square, no shadows</small></div><div class="tgl" id="tglBrutal" role="switch" tabindex="0"></div></div>
+  <div class="setting-row"><div>Gradient spines<small>Period cards fade start → end color</small></div><div class="tgl" id="tglGrad" role="switch" tabindex="0"></div></div>
+  <div class="setting-row">
+    <div>Date format</div>
+    <select class="fmt" id="fmtSel">
+      <option value="d.m.Y">31.01.2026</option>
+      <option value="m/d/Y">01/31/2026</option>
+      <option value="Y-m-d">2026-01-31</option>
+      <option value="j M Y">31 Jan 2026</option>
+      <option value="CUSTOM">Custom…</option>
+    </select>
+    <div id="fmtCustomWrap" style="display:none;width:100%">
+      <input class="fmt" type="text" id="fmtCustom" placeholder="e.g. D j. F Y" autocomplete="off">
+      <div class="fmt-preview" id="fmtPreview"></div>
+      <div class="panel-hint" style="padding:6px 0 0">
+        WordPress-style tokens: <b>d</b> 05 · <b>j</b> 5 · <b>m</b> 01 · <b>n</b> 1 ·
+        <b>y</b> 26 · <b>Y</b> 2026 · <b>M</b> Jan · <b>F</b> January · <b>D</b> Fri · <b>l</b> Friday
+        · <b>\</b> escapes a letter (<b>\D</b> → literal D)
+      </div>
+    </div>
+  </div>
+  <div class="menu-head">Backup &amp; Restore</div>
+  <button class="menu-item" id="exportBtn">Export events to file<small>JSON — this app's own format</small></button>
+  <button class="menu-item" id="importBtn">Import events from file<small>Accepts this app's export or the original Days Counter backup</small></button>
+  <input type="file" id="importFile" accept=".json,.txt,application/json,text/plain" style="display:none">
+  <div class="menu-head">Tools</div>
+  <button class="menu-item" id="mergeBtn">Merge "Start"/"End" pairs<small>Finds "X Start" + "X End" and combines them into periods</small></button>
+  <div class="menu-head">Danger zone</div>
+  <button class="menu-item" id="wipeBtn" style="color:var(--danger)">Delete all events</button>
+  <div class="menu-head">About</div>
+  <div class="panel-hint">Elapsum · self-hosted · <span class="about-version" id="aboutVersion"></span><br>
+Built after the Days Counter app vanished from Google Play — a self-hosted app can't be taken away.<br>
+Edge-swipe: left edge = sort, right edge = settings. Mid-screen swipe switches tabs.</div>
+</div>
+
+<!-- CONTENT -->
+<div id="content">
+  <div id="scrim"></div>
+  <div class="phone">
+    <header>
+      <div class="brand">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" aria-hidden="true">
+	<defs><linearGradient id="egH" x1="0" y1="0" x2="0" y2="1">
+		<stop offset="0" stop-color="#f6b183"/><stop offset="1" stop-color="#a4561e"/>
+	</linearGradient></defs>
+	<line x1="6" y1="4.5" x2="6" y2="19.5" stroke="url(#egH)" stroke-width="3.6"/>
+	<line x1="6" y1="5.5"  x2="19"   y2="5.5"  stroke="#f6b183" stroke-width="3.2"/>
+	<line x1="6" y1="12"   x2="15.5" y2="12"   stroke="#f07f2e" stroke-width="3.2"/>
+	<line x1="6" y1="18.5" x2="12.5" y2="18.5" stroke="#a4561e" stroke-width="3.2"/>
+</svg>
+        <h1 id="appName">Elapsum</h1>
+      </div>
+      <div class="hdr-icons">
+        <button class="icon-btn" id="searchBtn" aria-label="Search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </button>
+        <button class="icon-btn" id="sortBtn" aria-label="Sort">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h13M3 12h9M3 18h5"/></svg>
+        </button>
+        <button class="icon-btn" id="settingsBtn" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h0a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55h0a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v0a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+        </button>
+      </div>
+    </header>
+    <div class="tabs">
+      <button class="tab on" data-tab="counter" id="tabCounter">Counters</button>
+      <button class="tab" data-tab="yearly" id="tabYearly">Yearly</button>
+    </div>
+    <div class="searchbar" id="searchbar">
+      <input type="text" id="searchInput" placeholder="Search title or description…" autocomplete="off">
+    </div>
+    <div class="list" id="list"></div>
+  </div>
+</div>
+
+<button class="fab" id="fabBtn" aria-label="Add event">+</button>
+
+<!-- add / edit -->
+<div class="overlay" id="editOv">
+  <div class="sheet">
+    <h2 id="editTitle">New event</h2>
+    <div class="seg">
+      <button type="button" data-kind="single">Single date</button>
+      <button type="button" data-kind="range">Period</button>
+      <button type="button" data-kind="yearly">Yearly</button>
+    </div>
+    <div class="field">
+      <label for="fTitle">Title</label>
+      <input type="text" id="fTitle" maxlength="60" autocomplete="off">
+    </div>
+    <div class="two-col">
+      <div class="field">
+        <label for="fDate" id="fDateLbl">Date</label>
+        <input type="date" id="fDate">
+      </div>
+      <div class="field" id="fEndWrap" style="display:none">
+        <label for="fEnd">End date</label>
+        <input type="date" id="fEnd">
+      </div>
+    </div>
+    <div class="hint" id="kindHint" style="display:none;margin:-6px 0 16px"></div>
+    <div class="field">
+      <label for="fDesc">Description</label>
+      <textarea id="fDesc" maxlength="300"></textarea>
+    </div>
+    <div class="field" id="unitsField">
+      <label>Show as</label>
+      <div class="unit-checks">
+        <label><input type="checkbox" data-u="y">Years</label>
+        <label><input type="checkbox" data-u="m">Months</label>
+        <label><input type="checkbox" data-u="w">Weeks</label>
+        <label><input type="checkbox" data-u="d" checked>Days</label>
+      </div>
+    </div>
+    <div class="pin-row">
+      <div>Pin to top</div>
+      <div class="tgl" id="tglPin" role="switch" tabindex="0"></div>
+    </div>
+    <div class="field">
+      <label>Color</label>
+      <div class="swatches" id="swatches"></div>
+    </div>
+    <div class="actions">
+      <button class="btn danger" id="deleteBtn" style="display:none;flex:0 0 auto;padding:13px 18px">Delete</button>
+      <button class="btn ghost" id="cancelBtn">Cancel</button>
+      <button class="btn primary" id="saveBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- wipe all -->
+<div class="overlay" id="wipe1Ov">
+  <div class="sheet">
+    <h2>Delete all events</h2>
+    <p class="confirm-text">This will permanently delete <b id="wipeCount"></b>. There is no undo. Consider exporting a backup first.</p>
+    <div class="actions">
+      <button class="btn ghost" id="wipe1Cancel">Cancel</button>
+      <button class="btn danger-solid" id="wipe1Next">Continue</button>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="wipe2Ov">
+  <div class="sheet">
+    <h2>Are you really sure?</h2>
+    <p class="confirm-text">Type <b>DELETE</b> to confirm wiping everything.</p>
+    <div class="field"><input type="text" id="wipeInput" autocomplete="off" autocapitalize="characters"></div>
+    <div class="actions">
+      <button class="btn ghost" id="wipe2Cancel">Cancel</button>
+      <button class="btn danger-solid" id="wipe2Confirm" disabled style="opacity:.4">Delete everything</button>
+    </div>
+  </div>
+</div>
+
+<!-- merge preview -->
+<div class="overlay" id="mergeOv">
+  <div class="sheet">
+    <h2>Merge into periods</h2>
+    <p class="confirm-text" id="mergeInfo"></p>
+    <div id="mergeList"></div>
+    <div class="actions">
+      <button class="btn ghost" id="mergeCancel">Cancel</button>
+      <button class="btn primary" id="mergeConfirm">Merge selected</button>
+    </div>
+  </div>
+</div>
+
+<!-- import duplicates -->
+<div class="overlay" id="dupOv">
+	<div class="sheet">
+		<h2>Duplicates found</h2>
+		<p class="confirm-text" id="dupInfo"></p>
+		<div id="dupList"></div>
+		<div class="actions">
+			<button class="btn ghost" id="dupCancel">Cancel</button>
+			<button class="btn ghost" id="dupSkip">Skip duplicates</button>
+			<button class="btn primary" id="dupAll">Import all</button>
+		</div>
+	</div>
+</div>
+
+<div id="toast"><span id="toastMsg"></span><button id="toastAct"></button></div>
+
+<!-- Desktop landing (≥992px). Phones never see this. -->
+<div class="deck">
+	<div class="deck-brand">
+		<svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" aria-hidden="true">
+			<defs><linearGradient id="egD" x1="0" y1="0" x2="0" y2="1">
+				<stop offset="0" stop-color="#f6b183"/><stop offset="1" stop-color="#a4561e"/>
+			</linearGradient></defs>
+			<line x1="6" y1="4.5" x2="6" y2="19.5" stroke="url(#egD)" stroke-width="3.6"/>
+			<line x1="6" y1="5.5"  x2="19"   y2="5.5"  stroke="#f6b183" stroke-width="3.2"/>
+			<line x1="6" y1="12"   x2="15.5" y2="12"   stroke="#f07f2e" stroke-width="3.2"/>
+			<line x1="6" y1="18.5" x2="12.5" y2="18.5" stroke="#a4561e" stroke-width="3.2"/>
+		</svg>
+		<span class="deck-name">Elapsum</span>
+	</div>
+	<p class="deck-tag">Days since. Days until. Periods with both ends counted.</p>
+	<p class="deck-copy">Built to replace the Android app "Days Counter" after it was pulled
+		from Google Play — the whole point of a self-hosted app is that it can't be taken away.
+		No account, no cloud: everything lives in your phone's own storage, fully offline
+		once installed.</p>
+	<p class="deck-copy dim">Imports backups from the original Days Counter app, plus
+		Elapsum's own exports. Other apps' formats are not supported.</p>
+	<div class="deck-qr">
+		<img src="/assets/img/qr-elapsum.svg" alt="QR code linking to elapsum.com" width="148" height="148">
+		<span class="deck-qr-cap">Open on your phone<br>elapsum.com</span>
+	</div>
+	<p class="deck-motto">Tempus elapsum, opus incohatum</p>
+	<footer>
+		<p class="deck-links">
+			<a href="https://dahlskebank.com" target="_blank" rel="noopener" title="Dahlske Bank">Powered by dB</a>
+			<a href="https://danieldahl.com" target="_blank" rel="noopener" title="Daniel Dahl">Fueled by dD</a>
+			<a href="https://dxd.no" target="_blank" rel="noopener" title="deus ex Dahl">Pinnacle of dxD</a>
+			<a href="https://dfault.it" target="_blank" rel="noopener" title="D-Fault Pending">D-Fault Pending</a>
+		</p>
+		<p class="deck-legal">© 2026 ⌁ <span id="footYear"></span> →
+			<a href="https://elapsum.com">Elapsum.com</a> · <span id="footVersion"></span></p>
+	</footer>
+</div>
+
+<script src="/model.js"></script>
+<script src="/storage.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>
