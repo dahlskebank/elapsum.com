@@ -124,7 +124,7 @@ process.on('exit', () => {
 - [ ] **Step 5: Run the harness to verify it loads**
 
 Run (from `E:\www\dev\elapsum.com`): `node _dev/run-tests.mjs`
-Expected: fails with `ENOENT ... _site/storage.js` — storage.js doesn't exist yet. Temporarily confirm harness logic with: `node -e "console.log('node ok')"` → `node ok`. (storage.js arrives in Task 6; until then run tests with the model-only context — every test block below that predates Task 6 uses `freshContext(['_site/model.js'])`.)
+Expected: prints `0 passed, 0 failed`, exit 0 — no test blocks exist yet, and `freshContext()` (the only thing that reads the app files) is defined but not invoked until Task 2 appends the first block. (storage.js arrives in Task 6; until then every test block uses the model-only context `freshContext(['_site/model.js'])`.)
 
 - [ ] **Step 6: Commit**
 
@@ -457,7 +457,7 @@ function detectPairs(events) {
 }
 ```
 
-- [ ] **Step 2: Run tests** — Expected: 4 FAIL (missing file / `migrate is not defined`).
+- [ ] **Step 2: Run tests** — Expected: the harness CRASHES with an uncaught `ENOENT ... _site/storage.js` after the earlier blocks report `18 passed` (the Task 6 block calls `freshContext()` at block top level, and storage.js doesn't exist yet — the crash IS the red state; the 4 new tests run once Step 3 creates the file).
 
 - [ ] **Step 3: Create `_site/storage.js`:** header comment, then PORT v3 lines 572 (`STORE_KEY`), 579 (`DEFAULT_SETTINGS`), 591–619 (`migrate`, `load`, `save`) verbatim, with ONE delta in `save()`: v3's `toast(...)` call becomes `console.error` + rethrow-free return (storage must not know about the toast UI; app.js wraps it — see Task 8 Step 3 delta list). Then append:
 
@@ -808,7 +808,7 @@ Edge-swipe: left edge = sort, right edge = settings. Mid-screen swipe switches t
 
 (The v3 inline `<script>` block — lines 563–1405 including the wrapping tags — is NOT ported into index.html; its body, lines 564–1404, becomes app.js in Task 9. The footer labels above were verified against `e:/www/dev/__boilerplate/src/_data/site.json → footer.links` on 2026-07-17; re-check that file before executing this step and update labels/URLs if they changed.)
 
-- [ ] **Step 4: Sanity-check the DOM** (no browser needed):
+- [ ] **Step 4: Sanity-check the DOM** (no browser needed — run in **Git Bash, not PowerShell**: the `\"` escapes only survive bash quoting):
 
 Run: `node -e "const h=require('fs').readFileSync('_site/index.html','utf8'); for(const id of ['panelLeft','panelRight','content','scrim','fabBtn','editOv','wipe1Ov','wipe2Ov','mergeOv','dupOv','toast','aboutVersion','footYear','footVersion']){ if(!h.includes('id=\"'+id+'\"')) throw new Error('missing #'+id); } console.log('all ids present');"`
 Expected: `all ids present`.
@@ -1096,7 +1096,15 @@ Expected: 6 PNGs. Open `icon-512.png` and `icon-maskable-512.png` to eyeball: gr
 
 - [ ] **Step 4: favicon.ico** — run in **Git Bash, not PowerShell** (PowerShell's `>` re-encodes binary output as UTF-16 and corrupts the file): `npx --yes png-to-ico _dev/icon-48.png > _site/favicon.ico` (verify: `node -e "const b=require('fs').readFileSync('_site/favicon.ico'); if(b[2]!==1) throw 0; console.log('ico ok', b.length, 'bytes')"`).
 
-- [ ] **Step 5: QR code** — `npx --yes qrcode -t svg -o _site/assets/img/qr-elapsum.svg "https://elapsum.com/"`. Verify the file starts with `<svg` and scan it with a phone once it renders on the deck.
+- [ ] **Step 5: QR code** (Git Bash) — the qrcode CLI does not create missing parent directories, and this is the first write into `assets/img/`:
+
+```bash
+mkdir -p _site/assets/img
+npx --yes qrcode -t svg -o _site/assets/img/qr-elapsum.svg "https://elapsum.com/"
+grep -c "<svg" _site/assets/img/qr-elapsum.svg
+```
+
+Expected: grep prints `1` (the file starts with an XML prolog, so check that it CONTAINS `<svg`, not that it starts with it). Scan it with a phone once it renders on the deck.
 
 - [ ] **Step 6: Create `_dev/og-image.html`** (1200×630, Slate style):
 
@@ -1273,7 +1281,7 @@ self.addEventListener("fetch", (event) => {
 });
 ```
 
-- [ ] **Step 3: Verify against reality** — every SHELL entry must exist:
+- [ ] **Step 3: Verify against reality** — every SHELL entry must exist (run in **Git Bash, not PowerShell**: the `\"` escapes only survive bash quoting):
 
 Run: `node -e "const fs=require('fs'); const src=fs.readFileSync('_site/sw.js','utf8'); const block=src.match(/const SHELL = \[([\s\S]*?)\];/)[1]; const shell=[...block.matchAll(/\"(\/[^\"]*)\"/g)].map(m=>m[1]).filter(u=>u!=='/'); const missing=shell.filter(u=>!fs.existsSync('_site'+u)); if(missing.length){ throw new Error('missing: '+missing.join(', ')); } console.log('shell complete:', shell.length, 'files');"`
 Expected: `shell complete: 18 files`. (The extraction is scoped to the SHELL array literal on purpose — the NOTE comment above it contains the quoted string `"/index.html"`, which a whole-file scan would miscount as a 19th entry.)
@@ -1541,9 +1549,13 @@ define SITE "elapsum.com"
 - [ ] **Step 2: Generate the cert** (Git Bash — openssl ships with Git for Windows):
 
 ```bash
+# -subj uses a DOUBLE slash on purpose: MSYS path conversion would rewrite
+# "/CN=..." into "C:/Program Files/Git/CN=..." and openssl would refuse it.
+# (Don't "fix" with MSYS_NO_PATHCONV=1 — that would also stop the /e/vlaragon
+# output paths from converting and openssl couldn't write them.)
 openssl req -x509 -newkey rsa:2048 -sha256 -days 3650 -nodes \
   -keyout /e/vlaragon/etc/ssl/elapsum.key -out /e/vlaragon/etc/ssl/elapsum.crt \
-  -subj "/CN=elapsum.com" -addext "subjectAltName=DNS:elapsum.com,DNS:www.elapsum.com"
+  -subj "//CN=elapsum.com" -addext "subjectAltName=DNS:elapsum.com,DNS:www.elapsum.com"
 ```
 
 Verify: `openssl x509 -in /e/vlaragon/etc/ssl/elapsum.crt -noout -ext subjectAltName` → shows both DNS entries.
@@ -1684,7 +1696,7 @@ git push
 ## Execution decisions (Daniel, 2026-07-17)
 
 1. **Mode: subagent-driven** — use superpowers:subagent-driven-development; fresh subagent per task, review between tasks.
-2. **Before Task 1:** re-run the embedded-code verification lens that was lost to a session limit during plan review: one agent extracting each complete code block this plan introduces (run-tests.mjs harness, test blocks, fmtTokens regex, parseImport, app.js delta snippets, fetch-fonts.mjs, icon-tile.html, sw.js, acceptance-backup.mjs, the node one-liners) and hunting real bugs — syntax, regexes, node:vm pitfalls, string escaping in call() expressions, PowerShell-vs-bash quoting. It may execute snippets in the session scratchpad; it must not touch the repo. Apply confirmed findings to this plan before executing.
+2. **Code-lens re-run: DONE 2026-07-18** — 2 finders + per-finding skeptics, 7 confirmed findings (openssl MSYS `-subj` mangling, PowerShell-hostile one-liners, wrong expected outputs in Tasks 1/6, missing `mkdir` before the QR write, QR verify wording), all applied to this plan. No further pre-execution verification owed.
 3. Daniel still owes: `_temp/backup.txt` (before Task 16), the admin `certutil` trust step (Task 15 Step 3), and the final walkthrough (Task 16 Step 4).
 
 ## Post-plan notes for the executor
