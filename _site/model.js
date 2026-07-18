@@ -35,17 +35,21 @@ const MMM = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','
 const MMMM = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DDD = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const DDDD = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-/* WordPress-style token formatter: d j m n y Y M F D l */
-function fmtTokens(s, pattern){
-  const [y,m,d] = s.split('-').map(Number);
-  const dow = new Date(toUTCnoon(s)).getUTCDay();
-  const map = {
-    d:String(d).padStart(2,'0'), j:String(d),
-    m:String(m).padStart(2,'0'), n:String(m),
-    y:String(y).slice(2), Y:String(y),
-    M:MMM[m-1], F:MMMM[m-1], D:DDD[dow], l:DDDD[dow]
-  };
-  return pattern.replace(/[djmnyYMFDl]/g, ch=>map[ch]);
+/* WordPress-style token formatter: d j m n y Y M F D l.
+   A backslash escapes the next character ("\Y Y" → "Y 2026"): the
+   regex consumes backslash+char in a single match, so escaped letters
+   never reach the token map. A trailing lone backslash matches
+   nothing and is left as-is. */
+function fmtTokens(s, pattern) {
+	const [y, m, d] = s.split('-').map(Number);
+	const dow = new Date(toUTCnoon(s)).getUTCDay();
+	const map = {
+		d: String(d).padStart(2, '0'), j: String(d),
+		m: String(m).padStart(2, '0'), n: String(m),
+		y: String(y).slice(2), Y: String(y),
+		M: MMM[m - 1], F: MMMM[m - 1], D: DDD[dow], l: DDDD[dow]
+	};
+	return pattern.replace(/\\(.)|[djmnyYMFDl]/g, (mt, escd) => escd !== undefined ? escd : map[mt]);
 }
 
 const DEFAULT_UNITS = {y:false,m:false,w:false,d:true};

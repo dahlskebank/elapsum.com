@@ -99,3 +99,20 @@ process.on('exit', () => {
 		eq(call(`unitWord('w',2)`), 'weeks');
 	});
 }
+
+/* ==== Task 3: fmtTokens backslash escaping ==== */
+{
+	const { call } = freshContext(['_site/model.js']);
+	test('fmtTokens: \\ escapes a token letter', () => {
+		eq(call(String.raw`fmtTokens('2026-01-31','\\D j')`), 'D 31');
+	});
+	test('fmtTokens: escaped literals inside a pattern', () => {
+		eq(call(String.raw`fmtTokens('2026-01-31','j. \\o\\f F')`), '31. of January');
+	});
+	test('fmtTokens: escaping a non-token char passes it through', () => {
+		eq(call(String.raw`fmtTokens('2026-01-31','\\x j')`), 'x 31');
+	});
+	test('fmtTokens: trailing lone backslash survives as-is', () => {
+		eq(call(String.raw`fmtTokens('2026-01-31','j\\')`), '31\\');
+	});
+}
