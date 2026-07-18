@@ -9,6 +9,10 @@
 	const q = new URLSearchParams(location.search);
 	const size = Number(q.get('size') || 512);
 	const mode = q.get('mode') || 'any';
+	/* NOTE: 0.22 rounds to rx=113 at size 512; the hand-authored
+	   _site/assets/icons/icon.svg is pinned at rx=112 — 1px apart on
+	   purpose-built files, imperceptible, but don't expect this page
+	   to regenerate icon.svg byte-for-byte. */
 	const rx = mode === 'any' ? Math.round(size * 0.22) : 0;
 	const padFrac = { any: 0.125, mask: 0.19, apple: 0.15 }[mode];
 	const pad = Math.round(size * padFrac);
