@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>403 — Elapsum</title>
+	<meta name="robots" content="noindex">
+	<link rel="icon" href="/favicon.ico" sizes="48x48">
+	<!-- Self-contained on purpose: an error page must never depend on
+	     the assets that may be the very thing that went missing. -->
+	<style>
+		*{box-sizing:border-box}
+		body{
+			margin:0;min-height:100vh;display:grid;place-items:center;
+			background:#101014;color:#eceaf0;text-align:center;
+			font-family:'Archivo','Segoe UI',sans-serif;
+		}
+		svg{width:72px;height:72px;margin:0 auto 20px;display:block}
+		h1{font-size:17px;letter-spacing:.24em;text-transform:uppercase;margin:0 0 8px;font-weight:600}
+		p{color:#77747f;font-size:13.5px;margin:0 auto 26px;max-width:300px;line-height:1.7}
+		a{
+			display:inline-block;padding:12px 26px;color:#1a0f05;text-decoration:none;
+			background:#f07f2e;border-radius:10px;font-weight:600;font-size:14px;
+		}
+	</style>
+</head>
+<body>
+	<main>
+		<svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" aria-hidden="true">
+			<defs><linearGradient id="eg" gradientUnits="userSpaceOnUse" x1="6" y1="4.5" x2="6" y2="19.5">
+				<stop offset="0" stop-color="#f6b183"/><stop offset="1" stop-color="#a4561e"/>
+			</linearGradient></defs>
+			<line x1="6" y1="4.5" x2="6" y2="19.5" stroke="url(#eg)" stroke-width="3.6"/>
+			<line x1="6" y1="5.5"  x2="19"   y2="5.5"  stroke="#f6b183" stroke-width="3.2"/>
+			<line x1="6" y1="12"   x2="15.5" y2="12"   stroke="#f07f2e" stroke-width="3.2"/>
+			<line x1="6" y1="18.5" x2="12.5" y2="18.5" stroke="#a4561e" stroke-width="3.2"/>
+		</svg>
+		<h1>403 — not for you</h1>
+		<p>This path is off limits. The counter, however, is all yours.</p>
+		<a href="/">Back to Elapsum</a>
+	</main>
+</body>
+</html>
