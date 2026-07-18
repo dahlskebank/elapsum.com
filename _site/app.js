@@ -607,13 +607,22 @@ document.getElementById('dupAll').addEventListener('click', () => {
 });
 document.getElementById('dupSkip').addEventListener('click', () => {
 	if (pendingImport) {
-		const key = (e) => e.title.trim().toLowerCase() + '|' + e.date;
-		const dup = new Set(pendingImport.dupes.map(key));
-		const fresh = pendingImport.imported.filter(ev => !dup.has(key(ev)));
+		const dup = new Set(pendingImport.dupes.map(dupeKey));
+		const fresh = pendingImport.imported.filter(ev => !dup.has(dupeKey(ev)));
 		if (fresh.length) appendImported(fresh);
 		else { closeOv('dupOv'); toast('Nothing new to import'); }
 	}
 	pendingImport = null;
+});
+
+/* The shared scrim-click / Escape handlers close #dupOv without going
+   through the three buttons — drop the pending payload then too, so
+   the sheet's state machine never depends on the overlay CSS alone. */
+document.getElementById('dupOv').addEventListener('click', e => {
+	if (e.target.id === 'dupOv') pendingImport = null;
+});
+document.addEventListener('keydown', e => {
+	if (e.key === 'Escape') pendingImport = null;
 });
 
 /* ---------- merge Start/End pairs ---------- */
@@ -709,11 +718,15 @@ document.getElementById('footVersion').textContent = APP_VERSION;
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator) {
 	window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
-	/* After a deploy the new SW takes over (skipWaiting+claim); reload
-	   once so the page runs the code the new cache serves. */
+	/* Reload once when a NEW deploy's SW takes over. hadController
+	   distinguishes a real update from the very first install claiming
+	   the page — clients.claim() on first visit must not reload the
+	   app out from under a user who is mid-edit. */
+	const hadController = !!navigator.serviceWorker.controller;
 	let reloaded = false;
 	navigator.serviceWorker.addEventListener('controllerchange', () => {
-		if (reloaded) return; reloaded = true; location.reload();
+		if (reloaded || !hadController) return;
+		reloaded = true; location.reload();
 	});
 }
 

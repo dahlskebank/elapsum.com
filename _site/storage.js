@@ -47,6 +47,11 @@ function buildExport(state, exportedIso) {
 	};
 }
 
+/* One definition of what makes two events "the same" for import
+   dedupe — parseImport and the app's Skip-duplicates button must
+   never disagree on this. */
+function dupeKey(e) { return e.title.trim().toLowerCase() + '|' + e.date; }
+
 /* Import parser. Accepts exactly two formats:
    1. The original Days Counter backup — a raw ARRAY of
       {id,title,description,date(ms),addition_date,widget_id}.
@@ -88,13 +93,12 @@ function parseImport(text, existingEvents) {
 			.map(migrate);
 	}
 	if (imported.length === 0) return { ok: false, error: 'No events found in file' };
-	const key = (e) => e.title.trim().toLowerCase() + '|' + e.date;
 	/* Guard the existing side too: a hand-edited localStorage entry with a
 	   non-string title/date must not crash the import — it just doesn't
 	   participate in dedupe. */
 	const seen = new Set(existingEvents
 		.filter(e => e && typeof e.title === 'string' && typeof e.date === 'string')
-		.map(key));
-	const dupes = imported.filter(ev => seen.has(key(ev)));
+		.map(dupeKey));
+	const dupes = imported.filter(ev => seen.has(dupeKey(ev)));
 	return { ok: true, imported, dupes };
 }
