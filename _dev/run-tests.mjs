@@ -85,4 +85,17 @@ process.on('exit', () => {
 	test('fmtTokens: base tokens', () => {
 		eq(call(`fmtTokens('2026-01-31','D j. F Y')`), 'Sat 31. January 2026');
 	});
+	test('breakdown: leading zero units are trimmed (0y 5m 9d → 5m 9d)', () => {
+		eq(call(`breakdown('2026-01-01','2026-06-10',{y:true,m:true,w:false,d:true})`),
+			[{ v: 5, u: 'm' }, { v: 9, u: 'd' }]);
+	});
+	test('evDuration: closed range counts both-ends span; non-range is 0', () => {
+		eq(call(`evDuration({kind:'range',date:'2025-01-01',end:'2025-02-01'})`), 31);
+		eq(call(`evDuration({kind:'single',date:'2025-01-01'})`), 0);
+	});
+	test('unitWord: only exactly 1 is singular (0 pluralizes)', () => {
+		eq(call(`unitWord('d',1)`), 'day');
+		eq(call(`unitWord('d',0)`), 'days');
+		eq(call(`unitWord('w',2)`), 'weeks');
+	});
 }
