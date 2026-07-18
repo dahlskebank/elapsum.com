@@ -46,3 +46,40 @@ function buildExport(state, exportedIso) {
 		events: state.events, order: state.order, settings: state.settings
 	};
 }
+
+/* Import parser. Accepts exactly two formats:
+   1. The original Days Counter backup — a raw ARRAY of
+      {id,title,description,date(ms),addition_date,widget_id}.
+   2. Elapsum's own export (and the old days-slate prototype export) —
+      an OBJECT with an events array; migrate() upgrades old fields.
+   Returns {ok:false,error} or {ok:true,imported,dupes} where dupes
+   lists incoming events whose title+date already exist — the UI asks
+   before appending those (importing the same file twice used to
+   silently duplicate everything). ids are NOT assigned here; the app
+   assigns them on append so they stay unique against live state. */
+function parseImport(text, existingEvents) {
+	let data;
+	try { data = JSON.parse(text); }
+	catch (e) { return { ok: false, error: 'Not valid JSON' }; }
+	let imported = [];
+	if (Array.isArray(data)) {
+		imported = data
+			.filter(x => x && typeof x.title === 'string' && typeof x.date === 'number')
+			.map((x, i) => ({
+				id: 0,
+				title: x.title.trim(),
+				desc: (x.description || '').trim(),
+				date: msToDateStr(x.date),
+				end: null, kind: 'single', units: null, pinned: false,
+				color: pickDefaultColor(i),
+				added: typeof x.addition_date === 'number' ? x.addition_date : Date.now()
+			}));
+	} else if (data && Array.isArray(data.events)) {
+		imported = data.events.filter(x => x && x.title && x.date).map(migrate);
+	}
+	if (imported.length === 0) return { ok: false, error: 'No events found in file' };
+	const key = (e) => e.title.trim().toLowerCase() + '|' + e.date;
+	const seen = new Set(existingEvents.map(key));
+	const dupes = imported.filter(ev => seen.has(key(ev)));
+	return { ok: true, imported, dupes };
+}

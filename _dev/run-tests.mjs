@@ -212,3 +212,38 @@ process.on('exit', () => {
 			{ events: [], sort: 'added_desc', order: [], settings: { theme: 'dark', brutal: false, gradient: true, dateFmt: 'd.m.Y', dateFmtCustom: '' } });
 	});
 }
+
+/* ==== Task 7: parseImport ==== */
+{
+	const { call } = freshContext();
+	test('parseImport: original Days Counter array format (ms dates)', () => {
+		/* Date.UTC(2026,1,2,12) — noon keeps the local calendar date stable
+		   in any timezone west of UTC+12 */
+		const ms = Date.UTC(2026, 1, 2, 12);
+		const r = call(`parseImport('${JSON.stringify([{ id: 9, title: ' Reta ', description: 'd', date: 'MS', addition_date: 5, widget_id: 0 }]).replace('"MS"', String(ms))}', [])`);
+		eq(r.ok, true);
+		eq(r.imported.length, 1);
+		eq(r.imported[0].title, 'Reta');
+		eq(r.imported[0].date, '2026-02-02');
+		eq(r.imported[0].kind, 'single');
+		eq(r.imported[0].added, 5);
+	});
+	test('parseImport: own format runs migrate (isRange → kind)', () => {
+		const r = call(`parseImport('${JSON.stringify({ app: 'days-slate', events: [{ id: 1, title: 'x', date: '2025-01-01', isRange: true }] })}', [])`);
+		eq(r.ok, true);
+		eq(r.imported[0].kind, 'range');
+	});
+	test('parseImport: flags duplicates by title+date against existing', () => {
+		const existing = JSON.stringify([{ id: 1, title: 'Reta', date: '2026-02-02' }]);
+		const incoming = JSON.stringify({ events: [{ id: 7, title: 'reta ', date: '2026-02-02' }, { id: 8, title: 'New', date: '2026-03-03' }] });
+		const r = call(`parseImport('${incoming.replace(/'/g, "\\'")}', ${existing})`);
+		eq(r.dupes.length, 1);
+		/* the raw title keeps its trailing space — only the dedupe KEY is
+		   trimmed/lowercased; migrate() never rewrites titles */
+		eq(r.dupes[0].title, 'reta ');
+	});
+	test('parseImport: garbage → ok:false with message', () => {
+		eq(call(`parseImport('not json', []).ok`), false);
+		eq(call(`parseImport('{"nope":1}', []).error`), 'No events found in file');
+	});
+}
