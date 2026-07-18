@@ -4,6 +4,10 @@
    globals, exactly like the browser), so we load the files into
    a node:vm context and evaluate expressions inside it with
    call(). Run:  node _dev/run-tests.mjs
+
+   NOTE: two error lines mid-run — "save failed Error: quota" and
+   "load failed SyntaxError" — are EXPECTED output from the deliberate
+   failure-path tests (each is followed by its green "ok" line).
    ============================================================ */
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
