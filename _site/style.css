@@ -31,6 +31,7 @@
 	font-family:'Archivo Expanded';
 	font-style:normal;
 	font-weight:600;
+	/* documents this static instance's physical width for face matching — no rule sets font-stretch today */
 	font-stretch:125%;
 	font-display:swap;
 	src:url('/assets/fonts/archivo-expanded-600-latin.woff2') format('woff2');

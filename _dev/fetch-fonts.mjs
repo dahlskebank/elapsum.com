@@ -44,5 +44,10 @@ for (const [url, family, extra, slugBase] of JOBS) {
 		console.log('saved', slug, buf.length, 'bytes');
 		out += `@font-face{\n\tfont-family:'${family}';\n\tfont-style:normal;\n\tfont-weight:${weight};\n${extra}\tfont-display:swap;\n\tsrc:url('/assets/fonts/${slug}') format('woff2');\n}\n`;
 	}
+	/* Fail loudly if Google's response shape drifts: silence here would
+	   mean missing font files and a broken offline precache later. */
+	if (!blocks.some(([, subset]) => subset === 'latin')) {
+		throw new Error('no latin @font-face block in response for ' + url);
+	}
 }
 console.log('\n/* paste into style.css: */\n' + out);
