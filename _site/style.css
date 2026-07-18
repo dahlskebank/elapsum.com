@@ -1,4 +1,40 @@
 /* ==== self-hosted fonts (added in the fonts task) ==== */
+@font-face{
+	font-family:'Archivo';
+	font-style:normal;
+	font-weight:400;
+	font-display:swap;
+	src:url('/assets/fonts/archivo-400-latin.woff2') format('woff2');
+}
+@font-face{
+	font-family:'Archivo';
+	font-style:normal;
+	font-weight:500;
+	font-display:swap;
+	src:url('/assets/fonts/archivo-500-latin.woff2') format('woff2');
+}
+@font-face{
+	font-family:'Archivo';
+	font-style:normal;
+	font-weight:600;
+	font-display:swap;
+	src:url('/assets/fonts/archivo-600-latin.woff2') format('woff2');
+}
+@font-face{
+	font-family:'Archivo';
+	font-style:normal;
+	font-weight:800;
+	font-display:swap;
+	src:url('/assets/fonts/archivo-800-latin.woff2') format('woff2');
+}
+@font-face{
+	font-family:'Archivo Expanded';
+	font-style:normal;
+	font-weight:600;
+	font-stretch:125%;
+	font-display:swap;
+	src:url('/assets/fonts/archivo-expanded-600-latin.woff2') format('woff2');
+}
 :root{
   --bg:#101014;
   --surface:#1b1b21;
