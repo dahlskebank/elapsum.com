@@ -133,3 +133,23 @@ function evDuration(ev){
   if(ev.kind !== 'range') return 0;
   return daysBetween(ev.date, ev.end || todayStr());
 }
+
+/* Merge tool: the original Days Counter had no periods, so Daniel
+   tracked them as two singles — "X Start" + "X End". This finds those
+   pairs among single events. The regex also accepts "ca End" (approx.
+   end) and Norwegian "slutt". */
+const SUFFIX_RE = /\s+(ca\s+)?(start|end|slutt)\s*$/i;
+function detectPairs(events) {
+	const singles = events.filter(e => e.kind === 'single');
+	const groups = {};
+	singles.forEach(e => {
+		const m = e.title.match(SUFFIX_RE);
+		if (!m) return;
+		const base = e.title.replace(SUFFIX_RE, '').trim();
+		const kind = /start$/i.test(m[2]) ? 'start' : 'end';
+		(groups[base] = groups[base] || {})[kind] = (groups[base][kind] || e);
+	});
+	return Object.entries(groups)
+		.filter(([, g]) => g.start && g.end)
+		.map(([base, g]) => ({ base, start: g.start, end: g.end }));
+}

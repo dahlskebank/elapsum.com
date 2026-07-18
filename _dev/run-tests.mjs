@@ -146,3 +146,25 @@ process.on('exit', () => {
 		eq(call('pickDefaultColor(0) === pickDefaultColor(32)'), true);
 	});
 }
+
+/* ==== Task 5: detectPairs ==== */
+{
+	const { call } = freshContext(['_site/model.js']);
+	const EVENTS = JSON.stringify([
+		{ id: 1, title: 'DD1 Start', kind: 'single', date: '2025-01-01' },
+		{ id: 2, title: 'DD1 End', kind: 'single', date: '2025-02-01' },
+		{ id: 3, title: 'TB start', kind: 'single', date: '2025-03-01' },
+		{ id: 4, title: 'TB slutt', kind: 'single', date: '2025-04-01' },
+		{ id: 5, title: 'NPP Start', kind: 'single', date: '2025-05-01' },
+		{ id: 6, title: 'NPP ca End', kind: 'single', date: '2025-06-01' },
+		{ id: 7, title: 'Carnivore Light Start', kind: 'single', date: '2025-07-01' },
+		{ id: 8, title: 'Solo Range', kind: 'range', date: '2025-01-01' }
+	]);
+	test('detectPairs: finds Start/End, start/slutt, Start/"ca End"; ignores unpaired + non-singles', () => {
+		const pairs = call(`detectPairs(${EVENTS})`);
+		eq(pairs.length, 3);
+		eq(pairs.map(p => p.base).sort(), ['DD1', 'NPP', 'TB']);
+		const dd1 = pairs.find(p => p.base === 'DD1');
+		eq([dd1.start.id, dd1.end.id], [1, 2]);
+	});
+}
