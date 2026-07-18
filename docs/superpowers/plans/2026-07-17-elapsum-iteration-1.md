@@ -1681,6 +1681,12 @@ git push
 
 ---
 
+## Execution decisions (Daniel, 2026-07-17)
+
+1. **Mode: subagent-driven** — use superpowers:subagent-driven-development; fresh subagent per task, review between tasks.
+2. **Before Task 1:** re-run the embedded-code verification lens that was lost to a session limit during plan review: one agent extracting each complete code block this plan introduces (run-tests.mjs harness, test blocks, fmtTokens regex, parseImport, app.js delta snippets, fetch-fonts.mjs, icon-tile.html, sw.js, acceptance-backup.mjs, the node one-liners) and hunting real bugs — syntax, regexes, node:vm pitfalls, string escaping in call() expressions, PowerShell-vs-bash quoting. It may execute snippets in the session scratchpad; it must not touch the repo. Apply confirmed findings to this plan before executing.
+3. Daniel still owes: `_temp/backup.txt` (before Task 16), the admin `certutil` trust step (Task 15 Step 3), and the final walkthrough (Task 16 Step 4).
+
 ## Post-plan notes for the executor
 
 - Tasks 2–7 are pure TDD and safe to do in one sitting; Tasks 8–9 are the big port — after each, run the Task 9 Step 2 leftover-check.
