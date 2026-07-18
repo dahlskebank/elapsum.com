@@ -370,14 +370,14 @@ body.brutal #toast{border-radius:0}
    is display:none and the app renders as usual. */
 .deck{display:none}
 @media (min-width:992px){
-	#content,.fab,.panel{display:none !important}
+	#content,.fab,.panel,.overlay{display:none !important}
 	.deck{
 		display:flex;flex-direction:column;align-items:center;justify-content:center;
 		min-height:100vh;padding:48px 24px 32px;text-align:center;
 	}
 	.deck-brand{display:flex;align-items:center;gap:14px;margin-bottom:10px}
 	.deck-brand svg{width:44px;height:44px;display:block}
-	.deck-name{font-family:'Archivo Expanded',sans-serif;font-size:34px;font-weight:600;letter-spacing:.02em}
+	.deck-name{margin:0;font-family:'Archivo Expanded',sans-serif;font-size:34px;font-weight:600;letter-spacing:.02em}
 	.deck-tag{color:var(--accent);font-size:15px;font-weight:600;margin-bottom:18px}
 	.deck-copy{color:var(--muted);font-size:14px;line-height:1.7;max-width:480px;margin-bottom:14px}
 	.deck-copy.dim{font-size:12.5px}
