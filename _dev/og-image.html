@@ -1,0 +1,31 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+	html,body{margin:0}
+	body{
+		width:1200px;height:630px;background:#101014;color:#eceaf0;
+		font-family:'Archivo',sans-serif;display:flex;align-items:center;gap:70px;
+		padding:0 90px;box-sizing:border-box;overflow:hidden;
+	}
+	@font-face{font-family:'Archivo';font-weight:400;src:url('../_site/assets/fonts/archivo-400-latin.woff2') format('woff2')}
+	@font-face{font-family:'Archivo';font-weight:600;src:url('../_site/assets/fonts/archivo-600-latin.woff2') format('woff2')}
+	@font-face{font-family:'Archivo Expanded';font-weight:600;font-stretch:125%;src:url('../_site/assets/fonts/archivo-expanded-600-latin.woff2') format('woff2')}
+	svg{width:220px;height:220px;flex-shrink:0}
+	h1{font-family:'Archivo Expanded',sans-serif;font-size:84px;font-weight:600;margin:0 0 18px;letter-spacing:.01em}
+	p{font-size:30px;color:#77747f;margin:0;line-height:1.5}
+	.motto{font-style:italic;font-size:24px;margin-top:26px;color:#f07f2e}
+</style>
+<svg viewBox="0 0 24 24" fill="none" stroke-linecap="round">
+	<defs><linearGradient id="eg" gradientUnits="userSpaceOnUse" x1="6" y1="4.5" x2="6" y2="19.5">
+		<stop offset="0" stop-color="#f6b183"/><stop offset="1" stop-color="#a4561e"/>
+	</linearGradient></defs>
+	<line x1="6" y1="4.5" x2="6" y2="19.5" stroke="url(#eg)" stroke-width="3.6"/>
+	<line x1="6" y1="5.5"  x2="19"   y2="5.5"  stroke="#f6b183" stroke-width="3.2"/>
+	<line x1="6" y1="12"   x2="15.5" y2="12"   stroke="#f07f2e" stroke-width="3.2"/>
+	<line x1="6" y1="18.5" x2="12.5" y2="18.5" stroke="#a4561e" stroke-width="3.2"/>
+</svg>
+<div>
+	<h1>Elapsum</h1>
+	<p>Days since. Days until.<br>A self-hosted days counter that can’t be taken away.</p>
+	<p class="motto">Tempus elapsum, opus incohatum</p>
+</div>

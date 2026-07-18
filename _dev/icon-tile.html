@@ -1,0 +1,28 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:transparent;overflow:hidden}</style>
+<div id="tile"></div>
+<script>
+	/* ?size=512            → rounded tile, 12.5% padding (purpose:any)
+	   ?size=512&mode=mask  → full-bleed square, 19% padding (maskable safe zone)
+	   ?size=180&mode=apple → full-bleed square, 15% padding (iOS crops its own radius) */
+	const q = new URLSearchParams(location.search);
+	const size = Number(q.get('size') || 512);
+	const mode = q.get('mode') || 'any';
+	const rx = mode === 'any' ? Math.round(size * 0.22) : 0;
+	const padFrac = { any: 0.125, mask: 0.19, apple: 0.15 }[mode];
+	const pad = Math.round(size * padFrac);
+	document.getElementById('tile').innerHTML =
+		`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
+			<defs><linearGradient id="eg" gradientUnits="userSpaceOnUse" x1="6" y1="4.5" x2="6" y2="19.5">
+				<stop offset="0" stop-color="#f6b183"/><stop offset="1" stop-color="#a4561e"/>
+			</linearGradient></defs>
+			<rect width="${size}" height="${size}" rx="${rx}" fill="#101014"/>
+			<g fill="none" stroke-linecap="round" transform="translate(${pad},${pad}) scale(${(size - pad * 2) / 24})">
+				<line x1="6" y1="4.5" x2="6" y2="19.5" stroke="url(#eg)" stroke-width="3.6"/>
+				<line x1="6" y1="5.5"  x2="19"   y2="5.5"  stroke="#f6b183" stroke-width="3.2"/>
+				<line x1="6" y1="12"   x2="15.5" y2="12"   stroke="#f07f2e" stroke-width="3.2"/>
+				<line x1="6" y1="18.5" x2="12.5" y2="18.5" stroke="#a4561e" stroke-width="3.2"/>
+			</g>
+		</svg>`;
+</script>
