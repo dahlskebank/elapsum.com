@@ -119,3 +119,30 @@ process.on('exit', () => {
 		eq(call(String.raw`fmtTokens('2026-01-31','\\\\Y')`), '\\2026');
 	});
 }
+
+/* ==== Task 4: sorted palette ==== */
+{
+	const { call } = freshContext(['_site/model.js']);
+	const V3_COLORS = [
+		'#d63ce0','#e6c229','#3d9be9','#2ec9a7','#5fbf4a','#e05252','#f07f2e','#8b5cf6',
+		'#f472b6','#9aa3b2','#c0392b','#e74c3c','#ff6b9d','#b03a8e','#7d3cff','#5c6bc0',
+		'#2f80ed','#00b8d9','#00c7b1','#27ae60','#a3cb38','#f5d547','#f2a33c','#e8863a',
+		'#c96f4a','#a9746e','#8d6e63','#6d7b8d','#4f5b66','#7f8c8d','#c8cdd4','#efe9dd'
+	];
+	test('COLORS: same 32 colors as v3, no additions or losses', () => {
+		const c = call('COLORS');
+		eq(c.length, 32);
+		eq([...c].sort().join(), [...V3_COLORS].sort().join());
+	});
+	test('COLORS: rainbow order — reds first, neutral tail last', () => {
+		const c = call('COLORS');
+		eq(c[0], '#e05252');
+		eq(c.slice(-6), ['#efe9dd', '#c8cdd4', '#9aa3b2', '#7f8c8d', '#6d7b8d', '#4f5b66']);
+	});
+	test('pickDefaultColor strides so consecutive events differ, covers all 32', () => {
+		const seen = new Set();
+		for (let i = 0; i < 32; i++) seen.add(call(`pickDefaultColor(${i})`));
+		eq(seen.size, 32);
+		eq(call('pickDefaultColor(0) === pickDefaultColor(32)'), true);
+	});
+}

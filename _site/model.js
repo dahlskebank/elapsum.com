@@ -2,6 +2,24 @@
 /* model.js — pure logic: dates, unit breakdown, recurrence, colors,
    date-token formatting, merge-pair detection. No DOM, no storage. */
 
+/* The 32-color palette, hue-sorted so the swatch grid reads as a
+   rainbow: 26 chromatic colors by hue (red → orange → yellow → green
+   → teal → blue → purple → pink), then 6 neutrals by lightness.
+   Same colors as v3, order changed on purpose (Daniel's request).
+   8 columns × 4 rows: row 1 reds/oranges, row 2 yellow→teal,
+   row 3 blue→magenta, row 4 pinks + the neutral tail. */
+const COLORS = [
+	'#e05252', '#e74c3c', '#c0392b', '#a9746e', '#8d6e63', '#c96f4a', '#f07f2e', '#e8863a',
+	'#f2a33c', '#e6c229', '#f5d547', '#a3cb38', '#5fbf4a', '#27ae60', '#2ec9a7', '#00c7b1',
+	'#00b8d9', '#3d9be9', '#2f80ed', '#5c6bc0', '#8b5cf6', '#7d3cff', '#d63ce0', '#b03a8e',
+	'#f472b6', '#ff6b9d', '#efe9dd', '#c8cdd4', '#9aa3b2', '#7f8c8d', '#6d7b8d', '#4f5b66'
+];
+/* Default color for the n-th created event. Neighbours in the sorted
+   array look alike, so we stride through it in steps of 7 (coprime
+   with 32 → the cycle still visits every color exactly once) to keep
+   consecutive new events visually distinct. */
+function pickDefaultColor(n) { return COLORS[(n * 7) % COLORS.length]; }
+
 /* ---------- color helpers ---------- */
 function hexToRgb(h){
   const n = parseInt(h.slice(1), 16);
