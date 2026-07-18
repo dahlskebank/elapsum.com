@@ -19,6 +19,7 @@ a native wrapper with widgets is a possible later iteration (see §12).
 - **Name:** Elapsum (Latin *elapsum* — "that which slipped away")
 - **Motto:** *Tempus elapsum, opus incohatum* (shown on the desktop deck, above the footer links)
 - **Logo:** the E-mark — three duration bars + gradient spine (SVG in handoff §2). Brand ramp: tint `#f6b183` · accent `#f07f2e` · shade `#a4561e` (light-bg variants in handoff §2).
+- **Wordmark (resolved 2026-07-17, supersedes handoff §2's "parked"):** the E-mark is the ONLY constructed glyph. The wordmark is simply E-mark + "Elapsum" set in Archivo Expanded. **Never attempt letterforms in the bars grammar** — that direction was tried and rejected in the original chat.
 
 ## 2. Locked decisions
 
@@ -35,11 +36,12 @@ no swipe-to-delete ever; Slate design as-is), plus these, decided 2026-07-17:
 | Site chrome | Full public treatment: OG/Twitter meta + og-image, JSON-LD WebApplication, robots index+follow, sitemap, humans.txt, security.txt, 403/404. |
 | Color palette order | Swatch grid sorted by hue (rainbow), neutrals last by lightness (§5). |
 | Versioning | Start `v1.0.0`. `APP_VERSION` in app.js + `CACHE` in sw.js + version line in Settings→About; bump all three per deploy. |
-| License / git | WTFPL. Local git repo, no remote for now. |
+| License / git | WTFPL. Git repo with public GitHub remote: github.com/dahlskebank/elapsum.com (created 2026-07-17 at Daniel's request). |
 
 ## 3. Where the handoff is overruled
 
 1. **Analytics:** GA4 included (see above).
+1a. **Wordmark:** no longer parked — resolved as E-mark + Archivo Expanded type; bars-grammar letterforms permanently rejected (§1).
 2. **Manifest icons:** separate `purpose:"any"` and `purpose:"maskable"` PNGs
    (192 + 512 each), not `"any maskable"` on one file — a maskable-safe icon
    looks shrunken when used as a regular icon. Matches 30days.
@@ -161,7 +163,7 @@ searching; deck renders ≥992px with QR + motto + footer.
 
 ## 11. Not building (iteration 1)
 
-Wordmark in bars style (parked — Daniel pondering) · Capacitor/native wrapper ·
+Letterform wordmark in bars style (REJECTED — never build, see §1) · Capacitor/native wrapper ·
 home-screen widgets · milestone highlights · share-card-as-image ·
 notifications · Google Drive sync (dropped) · swipe-to-delete (rejected,
 never) · dfault.it/projects catalog entry (post-launch).
