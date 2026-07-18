@@ -1433,6 +1433,13 @@ cp /e/www/sub/30days/.env.example .env.example
   …then restart Apache from the Laragon UI.
 - Quick loop without Apache: `npx http-server _site -p 8331 -c-1`
   (service workers also register on plain-http localhost).
+- **Testing on the Pixel against this PC:** Android can't edit its hosts
+  file, so use Chrome's USB port forwarding instead — Pixel: enable USB
+  debugging (Developer options), connect by cable; desktop Chrome:
+  `chrome://inspect/#devices` → Port forwarding → `8331` →
+  `localhost:8331`; then open `http://localhost:8331` ON THE PHONE.
+  localhost is a secure context on Android, so the service worker,
+  install prompt and offline mode all work — no certs, no DNS.
 
 ## Version bump — EVERY deploy
 
@@ -1440,13 +1447,13 @@ cp /e/www/sub/30days/.env.example .env.example
 2. `APP_VERSION` in `_site/app.js` (same number — fills About + deck footer)
 3. `lastmod` in `_site/sitemap.xml`
 
-## Deploy (Domeneshop — PARKED until the domain is acquired)
+## Deploy (Domeneshop — domain acquired 2026-07-18)
 
 1. Copy `.env.example` → `.env`, fill DEPLOY_HOST / DEPLOY_USER / DEPLOY_REMOTE / DEPLOY_KEY.
 2. ALWAYS preview first: `DRY_RUN=1 ./deploy.sh _site`
 3. Real deploy: `./deploy.sh _site` (mirror --delete: what's not local is removed remotely).
 
-## Go-live checklist (once the domain exists)
+## Go-live checklist (domain owned — work through when ready)
 
 - [ ] DNS at Domeneshop → webhotel; LE certificate for elapsum.com issued
 - [ ] Create the GA4 property, paste the measurement id into `window.GA_ID` in `_site/index.html`
@@ -1639,7 +1646,8 @@ if (dd3) {
 Single-user days-counter PWA (since/until/periods/yearly). Vanilla
 HTML/CSS/JS, no build step — `_site/` is hand-authored source AND web
 root, committed to git. Repo: https://github.com/dahlskebank/elapsum.com
-(public). Domain elapsum.com NOT ACQUIRED yet — local dev only.
+(public). Domain elapsum.com acquired 2026-07-18; go-live checklist in
+DEPLOY.md still pending (DNS/webhotel, LE cert, GA property).
 
 ## Architecture
 
@@ -1661,8 +1669,9 @@ root, committed to git. Repo: https://github.com/dahlskebank/elapsum.com
 
 ## Open items
 
-1. Domain acquisition → then the DEPLOY.md go-live checklist (GA_ID,
-   .htaccess cache re-enable, Search Console, LE cert).
+1. Domain acquired (2026-07-18) → work the DEPLOY.md go-live checklist
+   (DNS/webhotel, LE cert, GA_ID, .htaccess cache re-enable, Search
+   Console). Owner runs the actual deploy.
 2. On-device gesture tuning (thresholds ported untested from v3 —
    handoff §7 lists the risky ones).
 3. `window.GA_ID` empty until the GA4 property exists.

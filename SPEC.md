@@ -143,10 +143,11 @@ property exists.
   admin trust step (`certutil -addstore Root E:\vlaragon\etc\ssl\elapsum.crt`) —
   the shared laragon.crt has no elapsum.com SAN and Chrome silently blocks the
   service worker without it (kiande's old "install doesn't work" bug).
-- **Domain not acquired yet.** All URLs written for `https://elapsum.com/`;
-  deploy.sh/.env.example/DEPLOY.md ship ready; `.env` stays blank and go-live
-  (DNS, Domeneshop webhotel, LE cert, GA property, Search Console) is parked
-  until acquisition.
+- **Domain acquired 2026-07-18.** All URLs written for `https://elapsum.com/`;
+  deploy.sh/.env.example/DEPLOY.md ship ready; Daniel fills `.env` and works
+  the go-live checklist (DNS, Domeneshop webhotel, LE cert, GA property,
+  Search Console) when ready. Pixel testing pre-deploy: Chrome USB port
+  forwarding to localhost (recipe in DEPLOY.md).
 - `.htaccess` ships in no-cache test mode with the launch cache block
   commented and marked RE-ENABLE AT LAUNCH, like 30days.
 
