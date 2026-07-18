@@ -4,3 +4,6 @@
 
 # Daniel's real Days Counter backup — personal event data, never commit
 _temp/backup*
+
+# Intermediate captures from the _dev asset generators (icon-tile/og-image)
+_dev/*.png
