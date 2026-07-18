@@ -2,6 +2,7 @@
 /* app.js — DOM orchestration. Pure logic lives in model.js, storage
    in storage.js; this file owns state, rendering and events. */
 const APP_VERSION = 'v1.0.0'; /* bump with sw.js CACHE on every deploy */
+let reloadPending = false; /* set when a deployed update wants to reload while a sheet is open */
 
 let state = load();
 let editingId = null;
@@ -393,12 +394,12 @@ window.addEventListener('scroll', ()=>{
 /* ---------- overlays ---------- */
 const overlays=document.querySelectorAll('.overlay');
 function openOv(id){ document.getElementById(id).classList.add('open'); }
-function closeOv(id){ document.getElementById(id).classList.remove('open'); }
+function closeOv(id){ document.getElementById(id).classList.remove('open'); maybeDeferredReload(); }
 overlays.forEach(ov=>{
-  ov.addEventListener('click', e=>{ if(e.target===ov) ov.classList.remove('open'); });
+  ov.addEventListener('click', e=>{ if(e.target===ov){ ov.classList.remove('open'); maybeDeferredReload(); } });
 });
 document.addEventListener('keydown', e=>{
-  if(e.key==='Escape'){ overlays.forEach(ov=>ov.classList.remove('open')); setPanel(0); }
+  if(e.key==='Escape'){ overlays.forEach(ov=>ov.classList.remove('open')); setPanel(0); maybeDeferredReload(); }
 });
 
 /* ---------- add / edit ---------- */
@@ -715,6 +716,17 @@ document.getElementById('aboutVersion').textContent = APP_VERSION;
 document.getElementById('footYear').textContent = String(new Date().getFullYear());
 document.getElementById('footVersion').textContent = APP_VERSION;
 
+/* A deployed update must not yank the page out from under an open
+   sheet — a typed-but-unsaved event would be lost. If any overlay is
+   open when the new SW takes over, hold the reload until the UI is
+   idle again. */
+function maybeDeferredReload() {
+	if (!reloadPending) return;
+	if (document.querySelector('.overlay.open')) return;
+	reloadPending = false;
+	location.reload();
+}
+
 /* ---------- service worker ---------- */
 if ('serviceWorker' in navigator) {
 	window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
@@ -726,7 +738,9 @@ if ('serviceWorker' in navigator) {
 	let reloaded = false;
 	navigator.serviceWorker.addEventListener('controllerchange', () => {
 		if (reloaded || !hadController) return;
-		reloaded = true; location.reload();
+		reloaded = true;
+		if (document.querySelector('.overlay.open')) { reloadPending = true; return; }
+		location.reload();
 	});
 }
 
