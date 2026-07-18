@@ -69,17 +69,32 @@ function parseImport(text, existingEvents) {
 				id: 0,
 				title: x.title.trim(),
 				desc: (x.description || '').trim(),
+				/* NOTE: the original app stored the save-moment timestamp, not a
+				   fixed hour — msToDateStr derives the calendar date in the
+				   IMPORTING device's timezone. Fine for single-device use;
+				   documented because a cross-timezone import near midnight
+				   could shift a date by one day. */
 				date: msToDateStr(x.date),
 				end: null, kind: 'single', units: null, pinned: false,
 				color: pickDefaultColor(i),
 				added: typeof x.addition_date === 'number' ? x.addition_date : Date.now()
 			}));
 	} else if (data && Array.isArray(data.events)) {
-		imported = data.events.filter(x => x && x.title && x.date).map(migrate);
+		/* Same strictness as the array branch: a malformed item (numeric
+		   title, missing date) is silently dropped rather than crashing
+		   the whole import — the never-throw contract wins over strictness. */
+		imported = data.events
+			.filter(x => x && typeof x.title === 'string' && typeof x.date === 'string')
+			.map(migrate);
 	}
 	if (imported.length === 0) return { ok: false, error: 'No events found in file' };
 	const key = (e) => e.title.trim().toLowerCase() + '|' + e.date;
-	const seen = new Set(existingEvents.map(key));
+	/* Guard the existing side too: a hand-edited localStorage entry with a
+	   non-string title/date must not crash the import — it just doesn't
+	   participate in dedupe. */
+	const seen = new Set(existingEvents
+		.filter(e => e && typeof e.title === 'string' && typeof e.date === 'string')
+		.map(key));
 	const dupes = imported.filter(ev => seen.has(key(ev)));
 	return { ok: true, imported, dupes };
 }

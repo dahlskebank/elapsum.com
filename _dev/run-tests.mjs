@@ -246,4 +246,19 @@ process.on('exit', () => {
 		eq(call(`parseImport('not json', []).ok`), false);
 		eq(call(`parseImport('{"nope":1}', []).error`), 'No events found in file');
 	});
+	test('parseImport: malformed item among good ones is dropped, not fatal', () => {
+		const r = call(`parseImport('${JSON.stringify({ events: [{ id: 1, title: 'ok', date: '2025-01-01' }, { id: 2, title: 123, date: '2025-01-02' }, { id: 3, date: '2025-01-03' }] })}', [])`);
+		eq(r.ok, true);
+		eq(r.imported.length, 1);
+		eq(r.imported[0].title, 'ok');
+	});
+	test('parseImport: own format with empty events array → No events found', () => {
+		eq(call(`parseImport('{"events":[]}', []).error`), 'No events found in file');
+	});
+	test('parseImport: dedupe key normalizes the EXISTING side too', () => {
+		const existing = JSON.stringify([{ id: 1, title: ' REta ', date: '2026-02-02' }, { id: 2, title: 7, date: '2026-01-01' }]);
+		const incoming = JSON.stringify({ events: [{ id: 9, title: 'reta', date: '2026-02-02' }] });
+		const r = call(`parseImport('${incoming.replace(/'/g, "\\'")}', ${existing})`);
+		eq(r.dupes.length, 1);
+	});
 }
