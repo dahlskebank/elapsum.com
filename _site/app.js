@@ -531,9 +531,10 @@ document.getElementById('wipeBtn').addEventListener('click', ()=>{
 });
 document.getElementById('wipe1Cancel').addEventListener('click', ()=>closeOv('wipe1Ov'));
 document.getElementById('wipe1Next').addEventListener('click', ()=>{
-  closeOv('wipe1Ov');
+  /* open step-2 before closing step-1 — a deferred update reload must never find a no-overlay gap mid-confirm */
   wipeInput.value=''; wipeConfirmBtn.disabled=true; wipeConfirmBtn.style.opacity=.4;
   openOv('wipe2Ov');
+  closeOv('wipe1Ov');
 });
 wipeInput.addEventListener('input', ()=>{
   const ok=wipeInput.value.trim().toUpperCase()==='DELETE';
